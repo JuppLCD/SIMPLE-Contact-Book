@@ -1,5 +1,6 @@
 # Contact book
 import os
+import pathlib
 
 OPTIONS = {
     1: 'Add contact',
@@ -9,6 +10,25 @@ OPTIONS = {
     5: 'Find contact',
     0: 'Close'
 }
+
+
+def load_contacts_in_db(contact_book, file_name):
+    if pathlib.Path(file_name).exists():
+        with open(file_name, 'r') as db_file:
+            for line in db_file:
+                name, email, phone = line.strip().split(',')
+                contact_book.setdefault(name, (email, phone))
+    else:
+        with open(file_name, 'w') as db_file:
+            pass
+
+
+def refreshing_contacts_in_db(contact_book, file_name):
+    with open(file_name, 'w') as db_file:
+        pass
+    with open(file_name, 'a') as db_file:
+        for name, data in contact_book.items():
+            db_file.write(f'{name},{data[0]},{data[1]}\n')
 
 
 def create_section_title(title):
@@ -22,16 +42,22 @@ def show_menu():
         print(f'{key} ) {value}')
 
 
-def add_contact(contact_book):
+def add_contact(contact_book, db_file_name):
     create_section_title(OPTIONS[1].upper())
 
     name = input('Name: ')
-    email = input('Email: ')
-    phone = input('Phone: ')
 
-    contact_book.setdefault(name, (email, phone))
+    if contact_book.get(name):
+        print('There is already a contact with that name')
+    else:
+        email = input('Email: ')
+        phone = input('Phone: ')
 
-    print('The contact was created successfully')
+        contact_book.setdefault(name, (email, phone))
+        with open(db_file_name, 'a') as db_file:
+            db_file.write(f'{name},{email},{phone}\n')
+
+        print('The contact was created successfully')
 
 
 def show_contacts(contact_book):
@@ -49,7 +75,7 @@ def show_contacts(contact_book):
             print('*'*10)
 
 
-def edit_contact(contact_book):
+def edit_contact(contact_book, db_file_name):
     create_section_title(OPTIONS[3].upper())
 
     if (len(contact_book) == 0):
@@ -61,12 +87,13 @@ def edit_contact(contact_book):
             phone = input('Phone: ')
 
             contact_book[contact_to_edit] = (email, phone)
+            refreshing_contacts_in_db(contact_book, db_file_name)
             print('Contact successfully edited')
         else:
             print(f'No contacts found with the name: {contact_to_edit}.')
 
 
-def delete_contact(contact_book):
+def delete_contact(contact_book, db_file_name):
     create_section_title(OPTIONS[4].upper())
 
     if (len(contact_book) == 0):
@@ -75,6 +102,7 @@ def delete_contact(contact_book):
         contact_to_delete = input('Name: ')
         if (contact_book.get(contact_to_delete)):
             contact_book.pop(contact_to_delete)
+            refreshing_contacts_in_db(contact_book, db_file_name)
             print('Contact deleted successfully')
         else:
             print(f'No contacts found with the name: {contact_to_delete}.')
@@ -107,6 +135,8 @@ def find_contact(contact_book):
 def main():
     continuar = True
     contact_book = {}
+    db_file_name = 'db_contact_book.txt'
+    load_contacts_in_db(contact_book, db_file_name)
 
     while continuar:
         show_menu()
@@ -117,13 +147,13 @@ def main():
                 continuar = False
                 print('Bye, have a nice day')
             elif (opt == 1):
-                add_contact(contact_book)
+                add_contact(contact_book, db_file_name)
             elif (opt == 2):
                 show_contacts(contact_book)
             elif (opt == 3):
-                edit_contact(contact_book)
+                edit_contact(contact_book, db_file_name)
             elif (opt == 4):
-                delete_contact(contact_book)
+                delete_contact(contact_book, db_file_name)
             elif (opt == 5):
                 find_contact(contact_book)
         else:
