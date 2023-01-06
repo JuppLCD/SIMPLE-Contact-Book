@@ -12,7 +12,7 @@ OPTIONS = {
 }
 
 
-def load_contacts_in_db(contact_book, file_name):
+def load_contacts_in_db(contact_book: dict, file_name: str) -> None:
     if pathlib.Path(file_name).exists():
         with open(file_name, 'r') as db_file:
             for line in db_file:
@@ -23,7 +23,7 @@ def load_contacts_in_db(contact_book, file_name):
             pass
 
 
-def refreshing_contacts_in_db(contact_book, file_name):
+def refreshing_contacts_in_db(contact_book: dict, file_name: str) -> None:
     with open(file_name, 'w') as db_file:
         pass
     with open(file_name, 'a') as db_file:
@@ -31,18 +31,18 @@ def refreshing_contacts_in_db(contact_book, file_name):
             db_file.write(f'{name},{data[0]},{data[1]}\n')
 
 
-def create_section_title(title):
+def create_section_title(title: str) -> None:
     os.system('clear')
     print(f'							{title}')
 
 
-def show_menu():
+def show_menu() -> None:
     create_section_title('MENU')
     for key, value in OPTIONS.items():
         print(f'{key} ) {value}')
 
 
-def add_contact(contact_book, db_file_name):
+def add_contact(contact_book: dict, db_file_name: str) -> None:
     create_section_title(OPTIONS[1].upper())
 
     name = input('Name: ')
@@ -60,7 +60,7 @@ def add_contact(contact_book, db_file_name):
         print('The contact was created successfully')
 
 
-def show_contacts(contact_book):
+def show_contacts(contact_book: dict) -> None:
     create_section_title(OPTIONS[2].upper())
 
     if (len(contact_book) == 0):
@@ -75,7 +75,7 @@ def show_contacts(contact_book):
             print('*'*10)
 
 
-def edit_contact(contact_book, db_file_name):
+def edit_contact(contact_book: dict, db_file_name: str) -> None:
     create_section_title(OPTIONS[3].upper())
 
     if (len(contact_book) == 0):
@@ -93,7 +93,7 @@ def edit_contact(contact_book, db_file_name):
             print(f'No contacts found with the name: {contact_to_edit}.')
 
 
-def delete_contact(contact_book, db_file_name):
+def delete_contact(contact_book: dict, db_file_name: str) -> None:
     create_section_title(OPTIONS[4].upper())
 
     if (len(contact_book) == 0):
@@ -108,7 +108,7 @@ def delete_contact(contact_book, db_file_name):
             print(f'No contacts found with the name: {contact_to_delete}.')
 
 
-def find_contact(contact_book):
+def find_contact(contact_book: dict) -> None:
     create_section_title(OPTIONS[5].upper())
 
     if (len(contact_book) == 0):
@@ -132,7 +132,7 @@ def find_contact(contact_book):
                 print('*'*10)
 
 
-def main():
+def main() -> None:
     continuar = True
     contact_book = {}
     db_file_name = 'db_contact_book.txt'
