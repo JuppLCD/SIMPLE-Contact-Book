@@ -1,6 +1,6 @@
 # Contact book
 import os
-import pathlib
+from file_db import load_contacts_in_db, refreshing_contacts_in_db
 
 OPTIONS = {
     1: 'Add contact',
@@ -12,25 +12,6 @@ OPTIONS = {
 }
 
 
-def load_contacts_in_db(contact_book: dict, file_name: str) -> None:
-    if pathlib.Path(file_name).exists():
-        with open(file_name, 'r') as db_file:
-            for line in db_file:
-                name, email, phone = line.strip().split(',')
-                contact_book.setdefault(name, (email, phone))
-    else:
-        with open(file_name, 'w') as db_file:
-            pass
-
-
-def refreshing_contacts_in_db(contact_book: dict, file_name: str) -> None:
-    with open(file_name, 'w') as db_file:
-        pass
-    with open(file_name, 'a') as db_file:
-        for name, data in contact_book.items():
-            db_file.write(f'{name},{data[0]},{data[1]}\n')
-
-
 def create_section_title(title: str) -> None:
     os.system('clear')
     print(f'							{title}')
@@ -40,6 +21,14 @@ def show_menu() -> None:
     create_section_title('MENU')
     for key, value in OPTIONS.items():
         print(f'{key} ) {value}')
+
+
+def show_contact(name: str, email: str, phone: str) -> None:
+    print('*'*10)
+    print(f'Name: {name}')
+    print(f'Email: {email}')
+    print(f'Phone: {phone}')
+    print('*'*10)
 
 
 def add_contact(contact_book: dict, db_file_name: str) -> None:
@@ -60,7 +49,7 @@ def add_contact(contact_book: dict, db_file_name: str) -> None:
         print('The contact was created successfully')
 
 
-def show_contacts(contact_book: dict) -> None:
+def show_all_contacts(contact_book: dict) -> None:
     create_section_title(OPTIONS[2].upper())
 
     if (len(contact_book) == 0):
@@ -68,11 +57,7 @@ def show_contacts(contact_book: dict) -> None:
     else:
         print(f'There are {len(contact_book)} scheduled contacts \n')
         for name, contact in contact_book.items():
-            print('*'*10)
-            print(f'Name: {name}')
-            print(f'Email: {contact[0]}')
-            print(f'Phone: {contact[1]}')
-            print('*'*10)
+            show_contact(name, contact[0], contact[1])
 
 
 def edit_contact(contact_book: dict, db_file_name: str) -> None:
@@ -125,11 +110,7 @@ def find_contact(contact_book: dict) -> None:
         else:
             print(f'There are {len(contacts_match)} scheduled contacts \n')
             for name, contact in contacts_match:
-                print('*'*10)
-                print(f'Name: {name}')
-                print(f'Email: {contact[0]}')
-                print(f'Phone: {contact[1]}')
-                print('*'*10)
+                show_contact(name, contact[0], contact[1])
 
 
 def main() -> None:
@@ -149,7 +130,7 @@ def main() -> None:
             elif (opt == 1):
                 add_contact(contact_book, db_file_name)
             elif (opt == 2):
-                show_contacts(contact_book)
+                show_all_contacts(contact_book)
             elif (opt == 3):
                 edit_contact(contact_book, db_file_name)
             elif (opt == 4):
