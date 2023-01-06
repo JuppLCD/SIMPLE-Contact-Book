@@ -121,7 +121,11 @@ def main() -> None:
 
     while continuar:
         show_menu()
-        opt = int(input('Select an option: '))
+        opt = input('Select an option: ')
+        try:
+            opt = int(opt)
+        except ValueError:
+            opt = -1
 
         if (OPTIONS.get(opt)):
             if (opt == 0):
