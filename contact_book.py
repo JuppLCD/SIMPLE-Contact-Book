@@ -3,26 +3,18 @@ from file_db import DBFile
 
 
 class ContactBook:
-
-    OPTIONS = {
-        1: 'Add contact',
-        2: 'Show all contacts',
-        3: 'Edit contact',
-        4: 'Delete contact',
-        5: 'Find contact',
-        0: 'Close'
-    }
     contact_book = {}
 
     def __init__(self, db_file_name: str) -> None:
         self.db_file = DBFile(db_file_name, self.contact_book)
 
-        self.method_to_execute = {
-            1: self.add_contact,
-            2: self.show_all_contacts,
-            3: self.edit_contact,
-            4: self.delete_contact,
-            5: self.find_contact
+        self.OPTIONS = {
+            1: ('Add contact', self.add_contact),
+            2:  ('Show all contacts', self.show_all_contacts),
+            3: ('Edit contact', self.edit_contact),
+            4: ('Delete contact', self.delete_contact),
+            5: ('Find contact', self.find_contact),
+            0: ('Close',)
         }
 
     def start(self):
@@ -36,18 +28,8 @@ class ContactBook:
                 if (opt == 0):
                     loop = False
                     print('Bye, have a nice day')
-                # elif (opt == 1):
-                #     self.add_contact()
-                # elif (opt == 2):
-                #     self.show_all_contacts()
-                # elif (opt == 3):
-                #     self.edit_contact()
-                # elif (opt == 4):
-                #     self.delete_contact()
-                # elif (opt == 5):
-                #     self.find_contact()
                 else:
-                    self.method_to_execute[opt]()
+                    self.OPTIONS[opt][1]()
             else:
                 print('Invalid option')
 
@@ -61,7 +43,7 @@ class ContactBook:
     def show_menu(self) -> None:
         self.create_section_title('MENU')
         for key, value in self.OPTIONS.items():
-            print(f'{key} ) {value}')
+            print(f'{key} ) {value[0]}')
 
     def select_option(self) -> int:
         opt = input('Select an option: ')
@@ -72,7 +54,7 @@ class ContactBook:
         return opt
 
     def add_contact(self) -> None:
-        self.create_section_title(self.OPTIONS[1].upper())
+        self.create_section_title(self.OPTIONS[1][0].upper())
 
         name = input('Name: ')
 
@@ -88,7 +70,7 @@ class ContactBook:
             print('The contact was created successfully')
 
     def show_all_contacts(self) -> None:
-        self.create_section_title(self.OPTIONS[2].upper())
+        self.create_section_title(self.OPTIONS[2][0].upper())
 
         if (len(self.contact_book) == 0):
             print('There are no contacts.')
@@ -98,7 +80,7 @@ class ContactBook:
                 self.show_contact(name, contact[0], contact[1])
 
     def edit_contact(self) -> None:
-        self.create_section_title(self.OPTIONS[3].upper())
+        self.create_section_title(self.OPTIONS[3][0].upper())
 
         if (len(self.contact_book) == 0):
             print('There are no contacts.')
@@ -115,7 +97,7 @@ class ContactBook:
                 print(f'No contacts found with the name: {contact_to_edit}.')
 
     def delete_contact(self) -> None:
-        self.create_section_title(self.OPTIONS[4].upper())
+        self.create_section_title(self.OPTIONS[4][0].upper())
 
         if (len(self.contact_book) == 0):
             print('There are no contacts.')
@@ -129,7 +111,7 @@ class ContactBook:
                 print(f'No contacts found with the name: {contact_to_delete}.')
 
     def find_contact(self) -> None:
-        self.create_section_title(self.OPTIONS[5].upper())
+        self.create_section_title(self.OPTIONS[5][0].upper())
 
         if (len(self.contact_book) == 0):
             print('There are no contacts.')
