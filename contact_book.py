@@ -1,12 +1,12 @@
 import os
 from file_db import DBFile
+from contact import Contact
 
 
 class ContactBook:
-    contact_book = {}
-
     def __init__(self, db_file_name: str) -> None:
-        self.db_file = DBFile(db_file_name, self.contact_book)
+        self.__contact_book = []
+        self.db_file = DBFile(db_file_name, self.__contact_book)
 
         self.OPTIONS = {
             1: ('Add contact', self.add_contact),
@@ -16,6 +16,14 @@ class ContactBook:
             5: ('Find contact', self.find_contact),
             0: ('Close',)
         }
+
+    @property
+    def contact_book(self) -> list:
+        return self.__contact_book
+
+    @contact_book.setter
+    def contact_book(self, value: list):
+        self.__contact_book = value
 
     def start(self):
         loop = True
@@ -54,20 +62,29 @@ class ContactBook:
         return opt
 
     def add_contact(self) -> None:
-        self.create_section_title(self.OPTIONS[1][0].upper())
+        continuar = True
+        while continuar:
+            self.create_section_title(self.OPTIONS[1][0].upper())
 
-        name = input('Name: ')
+            name = input('Name: ')
 
-        if self.contact_book.get(name):
-            print('There is already a contact with that name')
-        else:
-            email = input('Email: ')
-            phone = input('Phone: ')
+            in_contact_book = any(self.get_contact_by_name(name))
 
-            self.contact_book.setdefault(name, (email, phone))
-            self.db_file.add_contact((name, email, phone))
+            if in_contact_book:
+                print('There is already a contact with that name')
+            else:
+                email = input('Email: ')
+                phone = input('Phone: ')
 
-            print('The contact was created successfully')
+                contact = Contact(name, email, phone)
+                self.contact_book.append(contact)
+
+                self.db_file.add_contact(contact)
+                print('The contact was created successfully')
+
+            more = input('Do you want to add more contacts? (s/n): ')
+            if more.lower() != 's':
+                continuar = False
 
     def show_all_contacts(self) -> None:
         self.create_section_title(self.OPTIONS[2][0].upper())
@@ -76,8 +93,8 @@ class ContactBook:
             print('There are no contacts.')
         else:
             print(f'There are {len(self.contact_book)} scheduled contacts \n')
-            for name, contact in self.contact_book.items():
-                self.show_contact(name, contact[0], contact[1])
+            for contact in self.contact_book:
+                contact.show()
 
     def edit_contact(self) -> None:
         self.create_section_title(self.OPTIONS[3][0].upper())
@@ -86,11 +103,23 @@ class ContactBook:
             print('There are no contacts.')
         else:
             contact_to_edit = input('Name: ')
-            if (self.contact_book.get(contact_to_edit)):
+
+            contact = self.get_contact_by_name(contact_to_edit)
+
+            if any(contact):
+                contact = contact[0]
+
                 email = input('Email: ')
                 phone = input('Phone: ')
 
-                self.contact_book[contact_to_edit] = (email, phone)
+                email = contact.email if email.strip() == '' else email
+                phone = contact.phone if phone.strip() == '' else phone
+
+                contact.update(email, phone)
+
+                # self.contact_book = list(filter(
+                #     lambda contact: contact.name != contact_to_edit, self.contact_book))
+                # self.contact_book.append(contact)
                 self.db_file.refreshing_contacts(self.contact_book)
                 print('Contact successfully edited')
             else:
@@ -102,13 +131,20 @@ class ContactBook:
         if (len(self.contact_book) == 0):
             print('There are no contacts.')
         else:
-            contact_to_delete = input('Name: ')
-            if (self.contact_book.get(contact_to_delete)):
-                self.contact_book.pop(contact_to_delete)
+            name = input('Name: ')
+
+            contact_to_delete = self.get_contact_by_name(name)
+
+            if any(contact_to_delete):
+                contact_to_delete = contact_to_delete[0]
+
+                self.contact_book = list(filter(
+                    lambda contact: contact.name != contact_to_delete.name, self.contact_book))
                 self.db_file.refreshing_contacts(self.contact_book)
+
                 print('Contact deleted successfully')
             else:
-                print(f'No contacts found with the name: {contact_to_delete}.')
+                print(f'No contacts found with the name: {name}.')
 
     def find_contact(self) -> None:
         self.create_section_title(self.OPTIONS[5][0].upper())
@@ -117,21 +153,16 @@ class ContactBook:
             print('There are no contacts.')
         else:
             find_contact = input('Name: ')
-            contacts_match = []
-            for name, contact in self.contact_book.items():
-                if (find_contact.lower() in name.lower()):
-                    contacts_match.append((name, contact))
+            contacts_match = tuple(
+                filter(lambda contact: find_contact.lower() in contact.name.lower(), self.contact_book))
 
             if (len(contacts_match) == 0):
                 print(f'No contacts found with the name: {find_contact}.')
             else:
                 print(f'There are {len(contacts_match)} scheduled contacts \n')
-                for name, contact in contacts_match:
-                    self.show_contact(name, contact[0], contact[1])
+                for contact in contacts_match:
+                    contact.show()
 
-    def show_contact(self, name, email: str, phone: str) -> None:
-        print('*'*10)
-        print(f'Name: {name}')
-        print(f'Email: {email}')
-        print(f'Phone: {phone}')
-        print('*'*10)
+    def get_contact_by_name(self, name: str) -> tuple:
+        return tuple(filter(
+            lambda contact: contact.name == name, self.contact_book))
